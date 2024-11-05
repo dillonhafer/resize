@@ -1,6 +1,4 @@
 // place files you want to import through the `$lib` alias in this folder.
-import pica from 'pica';
-
 export interface BlobItem {
 	filename: string;
 	file: Blob;
@@ -33,21 +31,20 @@ export function resizeImage(
 	const outputCanvas = document.createElement('canvas');
 	outputCanvas.width = intrinsicSize;
 	outputCanvas.height = intrinsicSize;
-	return pica()
-		.resize(img, outputCanvas)
-		.then((result) => pica().toBlob(result, 'image/png', 1))
-		.then((blob) => {
-			blobContainer.push({ filename: templateOption.filename, file: blob });
-			const urlCreator = window.URL || window.webkitURL;
-			newImage.src = urlCreator.createObjectURL(blob);
-			container.appendChild(newImage);
-		})
-		.catch((err) => {
-			if (!errorShown) {
-				errorShown = true;
-				alert(err);
+	let ctx = outputCanvas.getContext('2d');
+	ctx?.drawImage(img, 0, 0, intrinsicSize, intrinsicSize);
+	outputCanvas.toBlob(
+		(blob) => {
+			if (blob) {
+				blobContainer.push({ filename: templateOption.filename, file: blob });
+				const urlCreator = window.URL || window.webkitURL;
+				newImage.src = urlCreator.createObjectURL(blob);
+				container.appendChild(newImage);
 			}
-		});
+		},
+		'image/png',
+		1
+	);
 }
 
 type Theme = 'any' | 'dark' | 'tinted';
